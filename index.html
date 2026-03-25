@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Track and manage your personal information and entries">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Info">
+    <meta name="msapplication-TileColor" content="#4CAF50">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0px;
+            background-color: #f0f8f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(76,175,80,0.1);
+        }
+        h1 {
+            color: #2E7D32;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+       
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            height: 50px;
+        }
+        input[type="number"]:focus, input[type="text"]:focus, input[type="date"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2E7D32;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+        }
+
+          /* Enhanced dropdown styling */
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #fafafa;
+            color: #333;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+            height: 50px;
+        }
+        select:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+        }
+
+        /* Subtle hover for form fields */
+        input[type="text"]:hover, input[type="date"]:hover, select:hover {
+            border-color: #81C784;
+        }
+
+        /* Add shadow to dropdown */
+        select {
+            box-shadow: 0 1px 4px rgba(76,175,80,0.08);
+        }
+        
+        /* Preset button styling */
+        .preset-btn {
+            background-color: #81C784;
+            color: #2E7D32;
+            padding: 8px 12px;
+            border: 1px solid #4CAF50;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            width: auto;
+            flex: 1;
+            min-width: 120px;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .preset-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Entries list styling */
+        .entries-container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #fafafa;
+        }
+        .entry-item {
+            background: white;
+            border: 1px solid #81C784;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(76,175,80,0.1);
+        }
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .delete-btn {
+            color: #dc3545;
+            background-color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+            margin-left: 10px;
+            width: 40px;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+            color: white;
+        }
+        .entry-scope {
+            background-color: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .entry-timestamp {
+            color: #666;
+            font-size: 12px;
+        }
+        .entry-message {
+            color: #2E7D32;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        #refreshBtn:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        /* Filter buttons styling */
+        .filter-btn {
+            background-color: white;
+            color: #2E7D32;
+            padding: 6px 12px;
+            border: 1px solid #81C784;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            width: auto;
+        }
+        .filter-btn:hover {
+            background-color: #81C784;
+            color: #2E7D32;
+        }
+        .filter-btn.active {
+            background-color: #d4a30d;
+            color: white;
+            font-weight: bold;
+        }
+
+        .filter-btn[data-filter="Ferdinand"]{
+            background-color: #eff0f1;
+            color: #2E7D32;
+        }
+       
+        .filter-btn[data-filter="Flocke"],
+        .filter-btn[data-filter="Hope"],
+        .filter-btn[data-filter="Schwarzi"]{
+            background-color: #663C1F;
+            color: white;
+        }
+
+        .filter-btn[data-filter="all"],
+        .filter-btn[data-filter="Herde"] {
+            background-color: #81C784;
+            color: #2E7D32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="logForm">
+            <div class="form-group">
+                <div style="display:flex;">
+                    <input type="text" list="scopeList" name="scope" id="scope" placeholder="Scope (wer oder was)" required >
+                    <datalist id="scopeList">
+                        <option value="Laurin">
+                        <option value="Marla">
+                        <option value="Tom">
+                        <option value="Haus">
+                        <option value="Gütle">
+                        <option value="Sonstiges">
+                    </datalist>
+                    <input type="date" id="date" name="date" required>
+                </div>
+
+                <input type="text" id="message" name="message" placeholder="Eintrag hier eingeben..." required>
+            </div>
+            
+            
+            <button type="submit" id="submitBtn">Speichern</button>
+        </form>
+        
+        <div id="result" class="result"></div>
+        
+        <!-- Entries List Section -->
+        <div style="margin-top: 30px; border-top: 2px solid #81C784; padding-top: 20px;">
+            
+            <!-- Filter Section -->
+            <div style="margin-bottom: 15px; padding: 10px; background-color: #f0f8f0; border-radius: 8px; border: 1px solid #81C784;">
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;align-items: center;">
+                    <button type="button" class="filter-btn" data-filter="Laurin">Laurin</button>
+                    <button type="button" class="filter-btn" data-filter="Marla">Marla</button>
+                    <button type="button" class="filter-btn" data-filter="Tom">Tom</button>
+                    |
+                    <button type="button" class="filter-btn" data-filter="Haus">Haus</button>
+                    <button type="button" class="filter-btn" data-filter="Gütle">Gütle</button>
+                
+                    |
+                    <button type="button" class="filter-btn" data-filter="Sonstiges">Sonstiges</button>
+                    <button type="button" class="filter-btn active" data-filter="all" style="margin-left: auto;">Alles</button>
+                </div>
+            </div>
+            
+            <div id="entriesList" class="entries-container">
+                <p style="text-align: center; color: #666; font-style: italic;">Lade Einträge...</p>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var server = 'https://tom-rose.de:9003';
+        //server = 'http://localhost:9003';
+        function setPresetMessage(message) {
+            document.getElementById('message').value = message;
+        }
+        
+        // Load entries on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date field with today's date
+            const dateField = document.getElementById('date');
+            const today = new Date();
+            dateField.valueAsDate = today;
+            
+            loadEntries();
+            setupFilterButtons();
+        });
+        
+        // Store all entries for filtering
+        let allEntries = [];
+        let currentFilter = 'all';
+        
+        // Setup filter button event listeners
+        function setupFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Set current filter
+                    currentFilter = this.getAttribute('data-filter');
+                    
+                    // Apply filter to current entries
+                    displayEntries(allEntries, currentFilter);
+                });
+            });
+        }
+        
+    
+        async function loadEntries() {
+            const entriesContainer = document.getElementById('entriesList');
+            
+            // Show loading state
+            entriesContainer.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">Lade Einträge...</p>';
+            
+            try {
+                const response = await fetch(`${server}/list`);
+                const data = await response.json();
+                
+                if (response.ok && Array.isArray(data)) {
+                    allEntries = data; // Store all entries
+                    displayEntries(data, currentFilter);
+                } else {
+                    entriesContainer.innerHTML = '<p style="text-align: center; color: #721c24;">Fehler beim Laden der Einträge</p>';
+                }
+            } catch (error) {
+                entriesContainer.innerHTML = `<p style="text-align: center; color: #721c24;">Netzwerkfehler: ${error.message}</p>`;
+            } 
+        }
+        
+        function displayEntries(entries, filter = 'all') {
+            const entriesContainer = document.getElementById('entriesList');
+            
+            // Filter entries based on selected filter
+            let filteredEntries = entries;
+            if (filter !== 'all') {
+                filteredEntries = entries.filter(entry => entry.scope === filter);
+            }
+            
+            if (filteredEntries.length === 0) {
+                const message = filter === 'all' ? 
+                    'Noch keine Einträge vorhanden' : 
+                    `Keine Einträge für ${filter} gefunden`;
+                entriesContainer.innerHTML = `<p style="text-align: center; color: #666; font-style: italic;">${message}</p>`;
+                return;
+            }
+            
+            const entriesHTML = filteredEntries.map(entry => {
+                const date = new Date(entry.timestamp);
+                const formattedDate = date.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+                
+                return `
+                    <div class="entry-item">
+                        <div class="entry-header">
+                            <span class="entry-scope">${entry.scope}</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="entry-timestamp">${formattedDate}</span>
+                                <button class="delete-btn" onclick="deleteEntry(${entry.id})" title="Eintrag löschen">X</button>
+                            </div>
+                        </div>
+                        <div class="entry-message">${entry.message}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            entriesContainer.innerHTML = entriesHTML;
+        }
+        
+        // Delete entry function
+        async function deleteEntry(id) {
+            if (!confirm('Sind Sie sicher, dass Sie diesen Eintrag löschen möchten?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${server}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: id })
+                });
+                
+                if (response.ok) {
+                    showResult('Eintrag erfolgreich gelöscht', 'success');
+                    loadEntries(); // Refresh the entries list
+                } else {
+                    const data = await response.json();
+                    showResult(`Fehler beim Löschen: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`Netzwerkfehler: ${error.message}`, 'error');
+            }
+        }
+        
+        document.getElementById('logForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const messageInput = document.getElementById('message');
+            const submitBtn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            
+            const message = messageInput.value.trim();
+            
+
+            if (!message) {
+                showResult('Please enter a message', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Augenblick bitte...';
+            showResult('Daten werden gesendet...', 'loading');
+            
+            try {
+                const response = await fetch(`${server}/post`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        scope: document.getElementById('scope').value,
+                        date: document.getElementById('date').value
+                    })
+                });
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult(`Nachricht erfolgreich gesendet!`, 'success');
+                    messageInput.value = ''; // Clear the form
+                    document.getElementById('scope').value = '';
+                    document.getElementById('date').valueAsDate = new Date(); // Reset to today
+                    // Refresh entries list after successful submission
+                    setTimeout(() => loadEntries(), 500);
+                } else {
+                    showResult(`Fehler: ${data.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showResult(`Netzwerkfehler: ${error.message}`, 'error');
+            } finally {
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Speichern';
+            }
+        });
+        
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.textContent = message;
+            result.className = `result ${type}`;
+            result.style.display = 'block';
+            
+            // Auto-hide success messages after 3 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    result.style.display = 'none';
+                }, 3000);
+            }
+        }
+    </script>
+    
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+        
+        // Install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Show install button (you can add this to UI later)
+            console.log('App can be installed');
+        });
+    </script>
+</body>
+</html>
