@@ -351,6 +351,8 @@
                     
                     // Set current filter
                     currentFilter = this.getAttribute('data-filter');
+
+                    document.getElementById('scope').value = currentFilter === 'all' ? '' : currentFilter; // Set scope input to filter value or clear if 'all'
                     
                     // Apply filter to current entries
                     displayEntries(allEntries, currentFilter);
