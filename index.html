@@ -272,12 +272,7 @@
                 <div style="display:flex;">
                     <input type="text" list="scopeList" name="scope" id="scope" placeholder="Scope (wer oder was)" required >
                     <datalist id="scopeList">
-                        <option value="Laurin">
-                        <option value="Marla">
-                        <option value="Tom">
-                        <option value="Haus">
-                        <option value="Gütle">
-                        <option value="Sonstiges">
+                       
                     </datalist>
                     <input type="date" id="date" name="date" required>
                 </div>
@@ -296,17 +291,8 @@
             
             <!-- Filter Section -->
             <div style="margin-bottom: 15px; padding: 10px; background-color: #f0f8f0; border-radius: 8px; border: 1px solid #81C784;">
-                <div style="display: flex; gap: 6px; flex-wrap: wrap;align-items: center;">
-                    <button type="button" class="filter-btn" data-filter="Laurin">Laurin</button>
-                    <button type="button" class="filter-btn" data-filter="Marla">Marla</button>
-                    <button type="button" class="filter-btn" data-filter="Tom">Tom</button>
-                    |
-                    <button type="button" class="filter-btn" data-filter="Haus">Haus</button>
-                    <button type="button" class="filter-btn" data-filter="Gütle">Gütle</button>
-                
-                    |
-                    <button type="button" class="filter-btn" data-filter="Sonstiges">Sonstiges</button>
-                    <button type="button" class="filter-btn active" data-filter="all" style="margin-left: auto;">Alles</button>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;align-items: center;" id="filterButtonsContainer">
+                   
                 </div>
             </div>
             
@@ -319,6 +305,9 @@
 
     <script>
         var server = 'https://tom-rose.de:9003';
+
+        var scopes = new Set();
+
         //server = 'http://localhost:9003';
         function setPresetMessage(message) {
             document.getElementById('message').value = message;
@@ -332,7 +321,6 @@
             dateField.valueAsDate = today;
             
             loadEntries();
-            setupFilterButtons();
         });
         
         // Store all entries for filtering
@@ -402,6 +390,10 @@
             const entriesHTML = filteredEntries.map(entry => {
                 const date = new Date(entry.timestamp);
                 const formattedDate = date.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                scopes.add(entry.scope); // Add scope to the set of scopes
+                document.getElementById('scopeList').innerHTML = Array.from(scopes).map(scope => `<option value="${scope}"></option>`).join('');
+                document.getElementById('filterButtonsContainer').innerHTML =  Array.from(scopes).map(scope => `<button type="button" class="filter-btn" data-filter="${scope}">${scope}</button>`).join('');
                 
                 return `
                     <div class="entry-item">
@@ -416,7 +408,12 @@
                     </div>
                 `;
             }).join('');
+
+             document.getElementById('filterButtonsContainer').innerHTML += `<button type="button" class="filter-btn active" data-filter="all" style="margin-left: auto;">Alles</button>`;
+
             
+           setupFilterButtons();
+
             entriesContainer.innerHTML = entriesHTML;
         }
         
